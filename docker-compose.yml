@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pet-aegen-teto
+    restart: unless-stopped
+
+    ports:
+      - "5000:5000"
+
+    volumes:
+      # 모델 파일 (호스트에서 마운트)
+      - ./best_model_aegen_teto_ensemble.pth:/app/best_model_aegen_teto_ensemble.pth:ro
+
+      # 업로드 및 결과 폴더 (영구 저장)
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+
+      # 데이터셋 (선택사항, 로컬 경로에 맞게 수정)
+      # Windows: D:/pet-aegen-teto-dataset:/app/dataset:ro
+      # Linux: /data/pet-aegen-teto-dataset:/app/dataset:ro
+
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+
+    # 환경 변수 파일 (선택사항)
+    # env_file:
+    #   - .env
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # 리소스 제한 (선택사항)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 4G
+    #     reservations:
+    #       memory: 2G
+
+# 볼륨 정의 (선택사항)
+# volumes:
+#   uploads:
+#   results:

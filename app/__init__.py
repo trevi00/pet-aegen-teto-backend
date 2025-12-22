@@ -1,0 +1,100 @@
+"""
+Flask 애플리케이션 팩토리
+MVC 패턴을 적용한 Flask 앱 생성
+"""
+
+import os
+from flask import Flask
+from flask_cors import CORS
+import logging
+
+
+def create_app(config_name='default'):
+    """
+    Flask 애플리케이션 팩토리
+    
+    Args:
+        config_name: 설정 이름 ('default', 'development', 'production')
+        
+    Returns:
+        Flask 앱 인스턴스
+    """
+    # Flask 앱 생성
+    static_folder = 'static' if os.path.exists('static') else None
+    app = Flask(__name__, static_folder=static_folder, static_url_path='')
+    
+    # CORS 설정
+    CORS(app)
+    
+    # 기본 설정
+    app.config['UPLOAD_FOLDER'] = 'uploads'
+    app.config['RESULT_FOLDER'] = 'results'
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+    
+    # 폴더 생성
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
+    
+    # 로깅 설정
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # AI 모델 초기화
+    analyzer, classifier = _init_ai_models()
+    
+    # Services 초기화
+    from app.services import AnalyzerService, FileService
+    
+    analyzer_service = AnalyzerService(analyzer=analyzer, classifier=classifier)
+    file_service = FileService(upload_folder=app.config['UPLOAD_FOLDER'])
+    
+    # Controllers에 의존성 주입
+    from app.controllers import analysis_bp, main_bp
+    from app.controllers.analysis_controller import init_analysis_controller
+    
+    init_analysis_controller(analyzer_service, file_service)
+    
+    # Blueprints 등록
+    app.register_blueprint(main_bp)
+    app.register_blueprint(analysis_bp)
+
+    # 모니터링 초기화
+    from app.monitoring import init_monitoring
+    init_monitoring(app)
+
+    app.logger.info("="*60)
+    app.logger.info("Flask app initialized with MVC pattern")
+    app.logger.info("="*60)
+
+    return app
+
+
+def _init_ai_models():
+    """AI 모델 초기화"""
+    print("="*60)
+    print("Loading AI models...")
+    print("="*60)
+    
+    analyzer = None
+    classifier = None
+    
+    try:
+        # AI 모델 import
+        from app.ai.ensemble_analyzer import EnsembleAnalyzer
+        from app.ai.classifier import AegenTetoClassifier
+        
+        analyzer = EnsembleAnalyzer()
+        classifier = AegenTetoClassifier()
+        
+        print("="*60)
+        print("All modules loaded successfully!")
+        print("="*60)
+        
+    except Exception as e:
+        print(f"Model loading failed: {e}")
+        import traceback
+        print(traceback.format_exc())
+    
+    return analyzer, classifier

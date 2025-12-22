@@ -1,0 +1,92 @@
+# Python
+.venv
+venv
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+dist
+build
+.pytest_cache
+.coverage
+htmlcov
+
+# Node.js
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# 프론트엔드 빌드 결과 (소스에서 다시 빌드)
+frontend/dist
+frontend/build
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.bak
+
+# 환경 변수 (실제 값)
+.env
+.env.local
+.env.*.local
+
+# 로그
+*.log
+logs
+training_*.txt
+
+# 테스트 및 개발 파일
+test_*.py
+*_test.py
+tests/
+.pytest_cache/
+
+# 문서 (README는 포함, 나머지 제외)
+*.md
+!README.md
+
+# 임시 파일
+tmp/
+temp/
+*.tmp
+
+# 데이터셋 (외부에서 마운트)
+dataset/
+data/
+*.jpg
+*.jpeg
+*.png
+*.gif
+
+# 모델 학습 관련 (사전 학습된 모델만 포함)
+training_*.txt
+*.pth
+!best_model_*.pth
+
+# 캐시
+.cache
+*.cache
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 배포 문서
+DEPLOY.md

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모델 학습</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .dataset-info {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .info-label {
+            color: #666;
+        }
+
+        .info-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .progress-section {
+            margin: 30px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .status-text {
+            text-align: center;
+            font-size: 1.1em;
+            color: #666;
+            margin: 15px 0;
+        }
+
+        .log-box {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+
+        .log-line {
+            margin: 5px 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 모델 학습</h1>
+
+        <div class="dataset-info" id="dataset-info">
+            <div class="info-row">
+                <span class="info-label">총 데이터:</span>
+                <span class="info-value" id="total-data">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">에겐 이미지:</span>
+                <span class="info-value" id="aegen-data">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">테토 이미지:</span>
+                <span class="info-value" id="teto-data">-</span>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <div class="status-text" id="status-text">학습을 시작하려면 아래 버튼을 클릭하세요</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%">0%</div>
+            </div>
+        </div>
+
+        <div class="log-box" id="log-box">
+            <div class="log-line">준비 완료. 학습을 시작할 수 있습니다.</div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn" id="start-btn" onclick="startTraining()">학습 시작</button>
+            <button class="btn hidden btn-success" id="complete-btn" onclick="location.href='/'">완료! 메인으로</button>
+            <button class="btn" onclick="location.href='/label'">← 라벨링으로</button>
+        </div>
+    </div>
+
+    <script>
+        let trainingInterval = null;
+
+        // 페이지 로드 시 데이터셋 정보 가져오기
+        async function loadDatasetInfo() {
+            try {
+                const response = await fetch('/dataset_info');
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('total-data').textContent = data.total + '장';
+                    document.getElementById('aegen-data').textContent = data.aegen + '장';
+                    document.getElementById('teto-data').textContent = data.teto + '장';
+                } else {
+                    addLog('데이터셋 정보를 불러올 수 없습니다: ' + data.error, 'error');
+                }
+            } catch (error) {
+                addLog('서버 연결 오류', 'error');
+            }
+        }
+
+        function addLog(message, type = 'info') {
+            const logBox = document.getElementById('log-box');
+            const line = document.createElement('div');
+            line.className = 'log-line';
+
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '[ERROR]' : type === 'success' ? '[SUCCESS]' : '[INFO]';
+
+            line.textContent = `[${timestamp}] ${prefix} ${message}`;
+            if (type === 'error') line.style.color = '#ff6b6b';
+            if (type === 'success') line.style.color = '#51cf66';
+
+            logBox.appendChild(line);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        async function startTraining() {
+            const startBtn = document.getElementById('start-btn');
+            const statusText = document.getElementById('status-text');
+
+            startBtn.disabled = true;
+            statusText.textContent = '학습 시작 중...';
+            addLog('모델 학습을 시작합니다...');
+
+            try {
+                const response = await fetch('/start_training', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog('학습이 시작되었습니다!', 'success');
+                    statusText.textContent = '학습 진행 중...';
+
+                    // 진행 상황 폴링 시작
+                    trainingInterval = setInterval(checkTrainingProgress, 1000);
+                } else {
+                    addLog('학습 시작 실패: ' + data.error, 'error');
+                    statusText.textContent = '학습 시작 실패';
+                    startBtn.disabled = false;
+                }
+            } catch (error) {
+                addLog('서버 연결 오류: ' + error, 'error');
+                statusText.textContent = '서버 연결 오류';
+                startBtn.disabled = false;
+            }
+        }
+
+        async function checkTrainingProgress() {
+            try {
+                const response = await fetch('/training_progress');
+                const data = await response.json();
+
+                if (data.status === 'training') {
+                    const progress = Math.round(data.progress);
+                    updateProgress(progress);
+                    document.getElementById('status-text').textContent = data.message || `학습 진행 중... (${progress}%)`;
+
+                    if (data.log) {
+                        addLog(data.log);
+                    }
+                } else if (data.status === 'completed') {
+                    updateProgress(100);
+                    document.getElementById('status-text').textContent = '학습 완료!';
+                    addLog('학습이 성공적으로 완료되었습니다!', 'success');
+                    addLog('정확도: ' + data.accuracy, 'success');
+
+                    clearInterval(trainingInterval);
+
+                    document.getElementById('start-btn').classList.add('hidden');
+                    document.getElementById('complete-btn').classList.remove('hidden');
+                } else if (data.status === 'error') {
+                    addLog('학습 중 오류 발생: ' + data.error, 'error');
+                    document.getElementById('status-text').textContent = '학습 실패';
+                    clearInterval(trainingInterval);
+
+                    document.getElementById('start-btn').disabled = false;
+                }
+            } catch (error) {
+                console.error('Progress check error:', error);
+            }
+        }
+
+        function updateProgress(percent) {
+            const fill = document.getElementById('progress-fill');
+            fill.style.width = percent + '%';
+            fill.textContent = percent + '%';
+        }
+
+        // 페이지 로드 시 실행
+        loadDatasetInfo();
+    </script>
+</body>
+</html>

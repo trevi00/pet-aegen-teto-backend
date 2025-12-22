@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Model files (large)
+*.pth
+*.pt
+*.onnx
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+app.log
+
+# Uploads and results
+uploads/
+results/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.backup
+*.bak
+
+# Lock files
+uv.lock
+
+# Temporary files
+nul
+*.tmp

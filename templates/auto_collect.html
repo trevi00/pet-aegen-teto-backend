@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자동 이미지 수집</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .option-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .card {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .card-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .card-pros {
+            font-size: 0.9em;
+            color: #28a745;
+            margin-bottom: 5px;
+        }
+
+        .card-cons {
+            font-size: 0.9em;
+            color: #dc3545;
+        }
+
+        .breed-list {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .breed-section {
+            margin: 15px 0;
+        }
+
+        .breed-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .breed-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .breed-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            font-size: 0.9em;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .api-form {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .api-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .help-text {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .link {
+            color: #667eea;
+            text-decoration: none;
+            border-bottom: 1px dashed #667eea;
+        }
+
+        .link:hover {
+            color: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 자동 이미지 수집</h1>
+        <p class="description">
+            품종별로 이미지를 자동 수집하여 더 정확한 AI 모델을 학습시킬 수 있습니다.<br>
+            아래 두 가지 방법 중 하나를 선택하세요.
+        </p>
+
+        <div class="option-cards">
+            <div class="card" onclick="showApiForm()">
+                <div class="card-title">🚀 자동 수집 (Unsplash API)</div>
+                <div class="card-description">
+                    Unsplash API를 사용하여 무료로 고품질 이미지를 자동 다운로드합니다.
+                </div>
+                <div class="card-pros">✓ 완전 자동화</div>
+                <div class="card-pros">✓ 고품질 이미지</div>
+                <div class="card-cons">✗ API 키 필요 (무료)</div>
+            </div>
+
+            <div class="card" onclick="location.href='/label'">
+                <div class="card-title">✋ 수동 수집</div>
+                <div class="card-description">
+                    직접 이미지를 다운로드하여 라벨링 페이지에서 업로드합니다.
+                </div>
+                <div class="card-pros">✓ API 키 불필요</div>
+                <div class="card-pros">✓ 원하는 이미지 선택</div>
+                <div class="card-cons">✗ 시간이 많이 소요</div>
+            </div>
+        </div>
+
+        <div class="api-form" id="api-form">
+            <h3>Unsplash API 설정</h3>
+            <div class="form-group">
+                <label for="api-key">API 키</label>
+                <input type="text" id="api-key" placeholder="Unsplash API 키를 입력하세요">
+                <div class="help-text">
+                    API 키가 없으신가요?
+                    <a href="https://unsplash.com/developers" target="_blank" class="link">여기서 무료로 발급</a>받으세요 (1분 소요)
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="images-per-breed">품종당 이미지 수</label>
+                <input type="number" id="images-per-breed" value="5" min="1" max="10">
+                <div class="help-text">권장: 5장 (총 100장)</div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="startAutoCollection()">수집 시작</button>
+                <button class="btn btn-secondary" onclick="hideApiForm()">취소</button>
+            </div>
+        </div>
+
+        <div class="breed-list">
+            <h2>수집할 품종 목록</h2>
+
+            <div class="breed-section">
+                <h3>🔥 에겐 품종 (10종)</h3>
+                <div class="breed-items">
+                    <div class="breed-item">Siberian Husky</div>
+                    <div class="breed-item">Golden Retriever</div>
+                    <div class="breed-item">German Shepherd</div>
+                    <div class="breed-item">Labrador Retriever</div>
+                    <div class="breed-item">Border Collie</div>
+                    <div class="breed-item">Bengal Cat</div>
+                    <div class="breed-item">Maine Coon</div>
+                    <div class="breed-item">Abyssinian</div>
+                    <div class="breed-item">Siamese</div>
+                    <div class="breed-item">Savannah Cat</div>
+                </div>
+            </div>
+
+            <div class="breed-section">
+                <h3>💕 테토 품종 (10종)</h3>
+                <div class="breed-items">
+                    <div class="breed-item">Poodle</div>
+                    <div class="breed-item">Maltese</div>
+                    <div class="breed-item">Pomeranian</div>
+                    <div class="breed-item">Shih Tzu</div>
+                    <div class="breed-item">Bichon Frise</div>
+                    <div class="breed-item">Persian Cat</div>
+                    <div class="breed-item">Ragdoll</div>
+                    <div class="breed-item">Scottish Fold</div>
+                    <div class="breed-item">British Shorthair</div>
+                    <div class="breed-item">Exotic Shorthair</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-secondary" onclick="location.href='/'">← 메인으로</button>
+        </div>
+    </div>
+
+    <script>
+        function showApiForm() {
+            document.getElementById('api-form').classList.add('active');
+        }
+
+        function hideApiForm() {
+            document.getElementById('api-form').classList.remove('active');
+        }
+
+        async function startAutoCollection() {
+            const apiKey = document.getElementById('api-key').value.trim();
+            const imagesPerBreed = document.getElementById('images-per-breed').value;
+
+            if (!apiKey) {
+                alert('API 키를 입력해주세요!');
+                return;
+            }
+
+            if (confirm(`품종당 ${imagesPerBreed}장씩, 총 ${imagesPerBreed * 20}장의 이미지를 수집하시겠습니까?\n(약 5-10분 소요)`)) {
+                // 서버에 요청
+                try {
+                    const response = await fetch('/auto_collect', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            api_key: apiKey,
+                            images_per_breed: parseInt(imagesPerBreed)
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        alert(`수집 완료!\n에겐: ${data.aegen_count}장\n테토: ${data.teto_count}장\n총: ${data.total_count}장`);
+                        location.href = '/train';
+                    } else {
+                        alert('수집 실패: ' + data.error);
+                    }
+                } catch (error) {
+                    alert('오류 발생: ' + error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
