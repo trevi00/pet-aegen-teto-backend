@@ -1,0 +1,187 @@
+{
+ "abyssinian": {
+  "ko": "아비시니안",
+  "species": "cat",
+  "known": 0.8
+ },
+ "bengal": {
+  "ko": "벵갈",
+  "species": "cat",
+  "known": 1.0
+ },
+ "birman": {
+  "ko": "버만",
+  "species": "cat",
+  "known": -0.6
+ },
+ "bombay": {
+  "ko": "봄베이",
+  "species": "cat",
+  "known": 0.0
+ },
+ "british_shorthair": {
+  "ko": "브리티시 숏헤어",
+  "species": "cat",
+  "known": -0.8
+ },
+ "egyptian_mau": {
+  "ko": "이집션 마우",
+  "species": "cat",
+  "known": 0.7
+ },
+ "maine_coon": {
+  "ko": "메인쿤",
+  "species": "cat",
+  "known": -0.2
+ },
+ "persian": {
+  "ko": "페르시안",
+  "species": "cat",
+  "known": -1.0
+ },
+ "ragdoll": {
+  "ko": "랙돌",
+  "species": "cat",
+  "known": -1.0
+ },
+ "russian_blue": {
+  "ko": "러시안 블루",
+  "species": "cat",
+  "known": -0.5
+ },
+ "siamese": {
+  "ko": "샴",
+  "species": "cat",
+  "known": 0.6
+ },
+ "sphynx": {
+  "ko": "스핑크스",
+  "species": "cat",
+  "known": 0.4
+ },
+ "american_bulldog": {
+  "ko": "아메리칸 불독",
+  "species": "dog",
+  "known": 0.6
+ },
+ "american_pit_bull_terrier": {
+  "ko": "아메리칸 핏불 테리어",
+  "species": "dog",
+  "known": 0.8
+ },
+ "basset_hound": {
+  "ko": "바셋 하운드",
+  "species": "dog",
+  "known": -0.9
+ },
+ "beagle": {
+  "ko": "비글",
+  "species": "dog",
+  "known": 0.7
+ },
+ "boxer": {
+  "ko": "복서",
+  "species": "dog",
+  "known": 0.9
+ },
+ "chihuahua": {
+  "ko": "치와와",
+  "species": "dog",
+  "known": 0.3
+ },
+ "english_cocker_spaniel": {
+  "ko": "잉글리시 코커 스패니얼",
+  "species": "dog",
+  "known": 0.4
+ },
+ "english_setter": {
+  "ko": "잉글리시 세터",
+  "species": "dog",
+  "known": 0.3
+ },
+ "german_shorthaired": {
+  "ko": "저먼 쇼트헤어드 포인터",
+  "species": "dog",
+  "known": 1.0
+ },
+ "great_pyrenees": {
+  "ko": "그레이트 피레니즈",
+  "species": "dog",
+  "known": -0.7
+ },
+ "havanese": {
+  "ko": "하바니즈",
+  "species": "dog",
+  "known": -0.1
+ },
+ "japanese_chin": {
+  "ko": "재패니즈 친",
+  "species": "dog",
+  "known": -0.8
+ },
+ "keeshond": {
+  "ko": "키스혼드",
+  "species": "dog",
+  "known": 0.0
+ },
+ "leonberger": {
+  "ko": "레온베르거",
+  "species": "dog",
+  "known": -0.4
+ },
+ "miniature_pinscher": {
+  "ko": "미니어처 핀셔",
+  "species": "dog",
+  "known": 0.8
+ },
+ "newfoundland": {
+  "ko": "뉴펀들랜드",
+  "species": "dog",
+  "known": -0.9
+ },
+ "pomeranian": {
+  "ko": "포메라니안",
+  "species": "dog",
+  "known": 0.4
+ },
+ "pug": {
+  "ko": "퍼그",
+  "species": "dog",
+  "known": -0.5
+ },
+ "saint_bernard": {
+  "ko": "세인트버나드",
+  "species": "dog",
+  "known": -0.9
+ },
+ "samoyed": {
+  "ko": "사모예드",
+  "species": "dog",
+  "known": 0.6
+ },
+ "scottish_terrier": {
+  "ko": "스코티시 테리어",
+  "species": "dog",
+  "known": 0.2
+ },
+ "shiba_inu": {
+  "ko": "시바견",
+  "species": "dog",
+  "known": 0.5
+ },
+ "staffordshire_bull_terrier": {
+  "ko": "스태퍼드셔 불 테리어",
+  "species": "dog",
+  "known": 0.8
+ },
+ "wheaten_terrier": {
+  "ko": "소프트 코티드 휘튼 테리어",
+  "species": "dog",
+  "known": 0.6
+ },
+ "yorkshire_terrier": {
+  "ko": "요크셔 테리어",
+  "species": "dog",
+  "known": 0.3
+ }
+}

@@ -12,7 +12,6 @@ LIMIT = int(sys.argv[1]) if len(sys.argv) > 1 else 0
 
 os.chdir(BACKEND)
 sys.path.insert(0, BACKEND)
-os.environ.setdefault("MODEL_TEMPERATURE", "3.078")
 # app/__init__.py 는 Flask 앱을 만든다 — 분석 모듈만 쓰므로 패키지 껍데기만 등록해 건너뛴다
 import types  # noqa: E402
 _pkg = types.ModuleType("app")
@@ -33,12 +32,12 @@ svc = AnalyzerService(EnsembleAnalyzer(), AegenTetoClassifier())
 t0 = time.time()
 with open(OUT if not LIMIT else OUT + ".sample", "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f)
-    w.writerow(["file", "breed", "species", "aegen_pct", "custom_pct", "blip_pct"])
+    w.writerow(["file", "breed", "species", "aegen_pct", "pred_breed", "breed_prob", "pose"])
     for i, r in enumerate(rows, 1):
         res = svc.analyze_image(os.path.join(DATA, "images", r["file"]))
-        info = res.get("ensemble_info", {})
+        bm = res.get("breed_match") or {}
         w.writerow([r["file"], r["breed"], r["species"], res["aegen_percentage"],
-                    info.get("custom_aegen"), info.get("blip_aegen")])
+                    bm.get("key", ""), bm.get("prob", ""), res["pose"]])
         if i % 500 == 0:
             print(f"{i}/{len(rows)} {time.time() - t0:.0f}s", flush=True)
 print(f"done {len(rows)} in {time.time() - t0:.0f}s")

@@ -78,7 +78,7 @@ data/
 training_*.txt
 *.pth
 !best_model_*.pth
-!trained_model_v2.pth
+!trained_model_v3.pth
 
 # 캐시
 .cache

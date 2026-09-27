@@ -38,7 +38,7 @@ def create_app(config_name='default'):
     app.config['RESULT_FOLDER'] = 'results'
     app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB (nginx 와 동일)
     app.config['MAX_FORM_PARTS'] = 5
-    app.config['MAX_FORM_MEMORY_SIZE'] = 64 * 1024
+    app.config["MAX_FORM_MEMORY_SIZE"] = 512 * 1024  # 비파일 필드 한도. 파서가 64KB 조각을 이 값과 비교하므로 64KB 이하로 두면 큰 사진이 413
     app.config['PROPAGATE_EXCEPTIONS'] = False
 
     # 폴더 생성

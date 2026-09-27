@@ -49,3 +49,4 @@ uv.lock
 # Temporary files
 nul
 *.tmp
+trained_model_v3.pth
