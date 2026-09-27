@@ -30,7 +30,7 @@ def create_app(config_name='default'):
     app = Flask(__name__, static_folder=static_folder, static_url_path='')
 
     # CORS 설정
-    origins = [o for o in os.environ.get('ALLOWED_ORIGINS', 'https://agtt.cloud').split(',') if o]
+    origins = [o for o in os.environ.get('ALLOWED_ORIGINS', 'https://agttpet.com').split(',') if o]
     CORS(app, origins=origins)
 
     # 기본 설정

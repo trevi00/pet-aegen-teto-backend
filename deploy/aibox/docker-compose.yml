@@ -1,4 +1,4 @@
-# agtt.cloud 배포 (aibox). 외부 노출은 cloudflared 터널 하나뿐 — 호스트 포트는 127.0.0.1 에만.
+# agttpet.com 배포 (aibox, 옛 주소 agtt.cloud). 외부 노출은 cloudflared 터널 하나뿐 — 호스트 포트는 127.0.0.1 에만.
 name: agtt
 
 services:
@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile.prod
     environment:
       GUNICORN_WORKERS: "1"
-      ALLOWED_ORIGINS: "https://agtt.cloud,https://www.agtt.cloud"
+      ALLOWED_ORIGINS: "https://agttpet.com,https://www.agttpet.com"
     read_only: true
     tmpfs:
       - /app/uploads:size=64m,uid=10001
