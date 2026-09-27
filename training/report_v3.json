@@ -1,0 +1,23 @@
+{
+ "split": {
+  "train": 6187,
+  "val": 367,
+  "test": 735,
+  "human_holdout": 60
+ },
+ "test": {
+  "rule_acc": 0.924,
+  "mae_pct": 7.453,
+  "breed_top1": 0.947,
+  "breed_top3": 0.989,
+  "pose_r": 0.786
+ },
+ "breed_known_vs_ai_r": -0.97,
+ "human_holdout_agree": "31/60",
+ "k": 4.0,
+ "epochs": 12,
+ "loss_weights": {
+  "breed": 0.5,
+  "pose": 0.5
+ }
+}

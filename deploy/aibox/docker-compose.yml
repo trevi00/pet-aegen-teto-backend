@@ -8,7 +8,6 @@ services:
       dockerfile: Dockerfile.prod
     environment:
       GUNICORN_WORKERS: "1"
-      MODEL_TEMPERATURE: "3.078"   # models/calibration.json (2026-09-27, 정답 240장으로 보정)
       ALLOWED_ORIGINS: "https://agtt.cloud,https://www.agtt.cloud"
     read_only: true
     tmpfs:

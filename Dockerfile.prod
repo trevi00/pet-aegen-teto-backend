@@ -1,4 +1,4 @@
-# Backend (Flask + BLIP) — CPU 전용, 모델은 빌드 때 받아 둔다
+# Backend (Flask + v3 모델) — CPU 전용
 FROM python:3.11-slim@sha256:e41613d42d4891e4930f79523f93f81bbc7632584ec65e36ab055f41a800b41e
 
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
@@ -13,18 +13,15 @@ RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu 
     && pip install --no-cache-dir -r /tmp/req.txt
 
 RUN pip install --no-cache-dir --upgrade "setuptools>=78.1.1"
-ENV HF_HOME=/opt/hf PYTHONUNBUFFERED=1 FLASK_APP=run.py
-RUN python -c "from transformers import BlipProcessor, BlipForConditionalGeneration as M; n='Salesforce/blip-image-captioning-base'; BlipProcessor.from_pretrained(n); M.from_pretrained(n)" \
-    && chmod -R a+rX /opt/hf
-ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+ENV PYTHONUNBUFFERED=1 FLASK_APP=run.py
 
 COPY app/ ./app/
 COPY run.py gunicorn.conf.py ./
-COPY trained_model_v2.pth ./
+COPY trained_model_v3.pth model_v3_meta.json ./
 
 RUN pip uninstall -y pip && rm -rf /root/.cache
 USER app
 EXPOSE 5000
-HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=5).status == 200 else 1)"
 CMD ["gunicorn", "--config", "gunicorn.conf.py", "run:app"]

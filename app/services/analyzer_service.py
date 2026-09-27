@@ -45,19 +45,22 @@ class AnalyzerService:
             classification_result = self.classifier.classify(analysis_result)
             logger.info(f"분류 완료: {classification_result}")
             
-            # 3. 신뢰도 정보 추가
-            confidence = analysis_result.get('ensemble_info', {}).get('final_confidence', 50)
-            models_agree = analysis_result.get('ensemble_info', {}).get('models_agree', False)
-            
+            # 3. 신뢰도 = 우세한 쪽 비율
+            confidence = max(classification_result['aegen_percentage'], classification_result['teto_percentage'])
+
             return {
                 'success': True,
                 'classification': classification_result['classification'],
                 'comment': classification_result['comment'],
                 'aegen_percentage': classification_result['aegen_percentage'],
                 'teto_percentage': classification_result['teto_percentage'],
+                'type': classification_result['type'],
+                'type_name': classification_result['type_name'],
+                'breed_match': classification_result['breed_match'],
+                'species': classification_result['species'],
+                'pose': classification_result['pose'],
                 'confidence': confidence,
                 'confidence_level': self._get_confidence_level(confidence),
-                'models_agree': models_agree,
                 'ensemble_info': analysis_result.get('ensemble_info', {})
             }
             
