@@ -1,0 +1,19 @@
+{
+ "holdout_n": 60,
+ "resnet_holdout_acc": 0.783,
+ "resnet_holdout_ci95": [
+  0.664,
+  0.869
+ ],
+ "taste_model_holdout_acc": 0.783,
+ "taste_model_ci95": [
+  0.664,
+  0.869
+ ],
+ "majority_baseline": 0.517,
+ "pseudo_labels": 6262,
+ "pseudo_teto": 3297,
+ "val_pseudo_best": 0.858,
+ "conf_threshold": 0.65,
+ "epochs": 10
+}

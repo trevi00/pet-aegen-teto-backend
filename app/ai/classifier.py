@@ -60,7 +60,11 @@ class AegenTetoClassifier:
 
         # 점수 정규화 (0-100 스케일)
         total_score = aegen_score + teto_score
-        if total_score > 0:
+        precise = analysis_result.get('aegen_percentage')
+        if precise is not None:
+            aegen_percentage = float(precise)
+            teto_percentage = 100 - aegen_percentage
+        elif total_score > 0:
             aegen_percentage = (aegen_score / total_score) * 100
             teto_percentage = (teto_score / total_score) * 100
         else:

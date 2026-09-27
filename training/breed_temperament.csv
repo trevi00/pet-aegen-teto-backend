@@ -1,0 +1,38 @@
+breed,species,score,reason
+Abyssinian,cat,0.8,매우 활동적·호기심 많음
+Bengal,cat,1.0,고에너지·야생 고양이 같은 외모
+Birman,cat,-0.6,온순·조용함
+Bombay,cat,0.0,애교 많고 적당히 활발
+British_Shorthair,cat,-0.8,느긋·점잖음
+Egyptian_Mau,cat,0.7,빠르고 활동적
+Maine_Coon,cat,-0.2,온화한 대형묘·놀기도 좋아함
+Persian,cat,-1.0,매우 차분·우아함
+Ragdoll,cat,-1.0,매우 온순·안기면 늘어짐
+Russian_Blue,cat,-0.5,조심스럽고 조용함
+Siamese,cat,0.6,말이 많고 활발
+Sphynx,cat,0.4,에너지 많고 관심 추구
+american_bulldog,dog,0.6,힘세고 활동적
+american_pit_bull_terrier,dog,0.8,고에너지·근육질
+basset_hound,dog,-0.9,느긋·저에너지
+beagle,dog,0.7,활발·후각 탐색
+boxer,dog,0.9,매우 활발·장난기
+chihuahua,dog,0.3,작지만 기세가 강함
+english_cocker_spaniel,dog,0.4,명랑·활동적
+english_setter,dog,0.3,온화하지만 운동량 많음
+german_shorthaired,dog,1.0,최상위 에너지 사냥견
+great_pyrenees,dog,-0.7,차분·듬직한 경비견
+havanese,dog,-0.1,온순·사교적
+japanese_chin,dog,-0.8,고양이 같은 점잖음·우아함
+keeshond,dog,0.0,명랑하지만 중간 에너지
+leonberger,dog,-0.4,온화한 대형견
+miniature_pinscher,dog,0.8,작은 체구의 고에너지
+newfoundland,dog,-0.9,매우 온화·느긋
+pomeranian,dog,0.4,활발·경계심
+pug,dog,-0.5,느긋·애교
+saint_bernard,dog,-0.9,매우 차분한 대형견
+samoyed,dog,0.6,활발·사교적 썰매견
+scottish_terrier,dog,0.2,점잖지만 테리어 기질
+shiba_inu,dog,0.5,독립적·기세 있음·여우 같은 야성
+staffordshire_bull_terrier,dog,0.8,고에너지·근육질
+wheaten_terrier,dog,0.6,명랑·활동적
+yorkshire_terrier,dog,0.3,작지만 활발·대담

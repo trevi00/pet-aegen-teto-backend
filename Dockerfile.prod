@@ -1,44 +1,30 @@
-# ========================================
-# Backend Dockerfile (Flask + PyTorch)
-# ========================================
-FROM python:3.11-slim
+# Backend (Flask + BLIP) — CPU 전용, 모델은 빌드 때 받아 둔다
+FROM python:3.11-slim@sha256:e41613d42d4891e4930f79523f93f81bbc7632584ec65e36ab055f41a800b41e
 
-# 시스템 의존성 설치
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# 작업 디렉토리 설정
+RUN useradd --create-home --uid 10001 app
 WORKDIR /app
 
-# Python 의존성 설치
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir gunicorn
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.9.0 torchvision==0.24.0 \
+    && grep -vE '^(torch|torchvision)==' requirements.txt > /tmp/req.txt \
+    && pip install --no-cache-dir -r /tmp/req.txt
 
-# 애플리케이션 코드 복사
+RUN pip install --no-cache-dir --upgrade "setuptools>=78.1.1"
+ENV HF_HOME=/opt/hf PYTHONUNBUFFERED=1 FLASK_APP=run.py
+RUN python -c "from transformers import BlipProcessor, BlipForConditionalGeneration as M; n='Salesforce/blip-image-captioning-base'; BlipProcessor.from_pretrained(n); M.from_pretrained(n)" \
+    && chmod -R a+rX /opt/hf
+ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+
 COPY app/ ./app/
-COPY run.py .
-COPY gunicorn.conf.py .
+COPY run.py gunicorn.conf.py ./
+COPY trained_model_v2.pth ./
 
-# 학습된 모델 파일 복사
-COPY trained_model_v2.pth .
-
-# 업로드 및 결과 폴더 생성
-RUN mkdir -p uploads results
-
-# 포트 노출
+RUN pip uninstall -y pip && rm -rf /root/.cache
+USER app
 EXPOSE 5000
-
-# 환경 변수 설정
-ENV PYTHONUNBUFFERED=1
-ENV FLASK_APP=run.py
-
-# 헬스체크
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
-
-# Gunicorn으로 실행
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=5).status == 200 else 1)"
 CMD ["gunicorn", "--config", "gunicorn.conf.py", "run:app"]

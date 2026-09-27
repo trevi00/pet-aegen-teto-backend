@@ -3,17 +3,24 @@ Gunicorn 프로덕션 설정
 고성능 WSGI 서버 설정 파일
 """
 
-import multiprocessing
+import os
 
 # 서버 소켓
 bind = "0.0.0.0:5000"
 backlog = 2048
 
 # Worker 프로세스
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = int(os.environ.get('GUNICORN_WORKERS', '1'))
 worker_class = "sync"
 worker_connections = 1000
 timeout = 120  # AI 모델 로딩을 위해 타임아웃 증가
+graceful_timeout = 30
+limit_request_line = 2048
+limit_request_fields = 50
+limit_request_field_size = 8190
+max_requests = 200          # PyTorch 메모리 증가를 주기적으로 끊는다
+max_requests_jitter = 50
+worker_tmp_dir = '/dev/shm'  # read-only rootfs 에서 heartbeat 파일
 keepalive = 5
 
 # 스레드

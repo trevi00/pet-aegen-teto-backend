@@ -73,8 +73,9 @@ class PetAnalyzer:
         analysis = self.analyze_image(image_path)
 
         # 특징 키워드 기반 점수 계산
-        aegen_keywords = ['strong', 'dignified', 'powerful', 'active', 'energetic', 'muscular', 'brave']
-        teto_keywords = ['cute', 'small', 'soft', 'calm', 'lazy', 'gentle', 'sweet', 'adorable']
+        # 에겐 = 차분·신중·매력적 / 테토 = 활발·적극·야성적 (2026-09 기준 재정의)
+        aegen_keywords = ['calm', 'gentle', 'sleepy', 'lazy', 'soft', 'cute', 'sweet', 'adorable', 'elegant', 'relaxed']
+        teto_keywords = ['active', 'energetic', 'playful', 'running', 'jumping', 'wild', 'fierce', 'strong', 'muscular', 'brave']
 
         aegen_score = 0
         teto_score = 0
