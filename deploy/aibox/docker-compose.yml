@@ -1,6 +1,11 @@
 # agttpet.com 배포 (aibox, 옛 주소 agtt.cloud). 외부 노출은 cloudflared 터널 하나뿐 — 호스트 포트는 127.0.0.1 에만.
 name: agtt
 
+# 로그 한도: 요청 폭주로 로그가 디스크를 채우지 못하게 (서비스당 최대 30MB)
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "3" }
+
 services:
   backend:
     build:
@@ -16,9 +21,10 @@ services:
       - /tmp:size=64m
     security_opt: ["no-new-privileges:true"]
     cap_drop: ["ALL"]
-    mem_limit: 6g
-    cpus: 6
+    mem_limit: 1g
+    cpus: 2
     pids_limit: 256
+    logging: *logging
     networks: [internal]
     restart: unless-stopped
 
@@ -36,6 +42,8 @@ services:
     cap_drop: ["ALL"]
     mem_limit: 256m
     cpus: 1
+    pids_limit: 128
+    logging: *logging
     ports:
       - "127.0.0.1:8081:8080"
     depends_on:
@@ -55,6 +63,8 @@ services:
     cap_drop: ["ALL"]
     mem_limit: 256m
     cpus: 0.5
+    pids_limit: 64
+    logging: *logging
     depends_on: [web]
     networks: [edge]   # web:8080 만 본다 — backend(internal) 와는 분리
     restart: unless-stopped
