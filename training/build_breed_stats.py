@@ -13,7 +13,7 @@ from PIL import Image
 HOME = os.path.expanduser("~/apps/agtt")
 DATA = f"{HOME}/data/oxford-pets"
 WEB = f"{HOME}/pet-aegen-teto-web"
-META = json.load(open("os.path.join(os.path.dirname(__file__), "breeds_meta.json")", encoding="utf-8"))
+META = json.load(open(os.path.join(os.path.dirname(__file__), "breeds_meta.json"), encoding="utf-8"))
 TYPES = [("pure-aegen", 80), ("aegen", 60), ("balanced", 40), ("teto", 20), ("pure-teto", -1)]
 
 
