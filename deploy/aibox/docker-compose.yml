@@ -46,9 +46,11 @@ services:
     restart: unless-stopped
 
   tunnel:
-    image: cloudflare/cloudflared:latest
-    command: tunnel --no-autoupdate run
-    env_file: ./secrets/tunnel.env   # TUNNEL_TOKEN (chmod 600, git 밖)
+    # digest 고정 (월 1회 갱신 + Trivy 스캔). 이미지 자체가 uid 65532 non-root
+    image: cloudflare/cloudflared@sha256:072c067d25ccbe61d46e18f0d0723255f2bb5304f7317caa95b27031520ff92c
+    # 토큰은 환경변수가 아니라 비밀 파일로 (docker inspect 에 안 보이게), 메트릭은 컨테이너 내부 전용
+    command: tunnel --no-autoupdate --metrics 127.0.0.1:20241 run --token-file /run/secrets/tunnel_token
+    secrets: [tunnel_token]
     read_only: true
     security_opt: ["no-new-privileges:true"]
     cap_drop: ["ALL"]
@@ -58,7 +60,14 @@ services:
     networks: [edge]   # web:8080 만 본다 — backend(internal) 와는 분리
     restart: unless-stopped
 
+secrets:
+  tunnel_token:
+    file: ./secrets/tunnel_token   # 호스트 디렉토리 700, git 밖
+
 networks:
   internal:
     internal: true   # backend 는 인터넷·호스트 LAN 에 나가지 못한다
-  edge: {}
+  edge:
+    ipam:
+      config:
+        - subnet: 172.31.250.0/29   # nginx set_real_ip_from / allow 와 일치해야 함

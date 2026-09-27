@@ -16,7 +16,11 @@ logger = logging.getLogger(__name__)
 class FileService:
     """파일 처리 서비스 클래스"""
 
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+    ALLOWED_FORMATS = ('JPEG', 'PNG', 'WEBP')
+    MAX_PIXELS = 40_000_000
+    MAX_SIDE = 8000
+    WORK_SIZE = (1024, 1024)
 
     def __init__(self, upload_folder: str):
         """
@@ -60,14 +64,23 @@ class FileService:
             filepath = os.path.join(self.upload_folder, f"{uuid.uuid4().hex}{ext}")
             file.save(filepath)
 
-            # 확장자만 바꾼 비이미지 파일 거부
+            # 확장자만 바꾼 비이미지·폭탄 이미지 거부, 통과하면 작게 정규화해 다시 저장
             try:
                 from PIL import Image
-                with Image.open(filepath) as im:
+                with Image.open(filepath, formats=self.ALLOWED_FORMATS) as im:
+                    w, h = im.size
+                    if w * h > self.MAX_PIXELS or max(w, h) > self.MAX_SIDE:
+                        raise ValueError('too large')
                     im.verify()
+                with Image.open(filepath, formats=self.ALLOWED_FORMATS) as im:
+                    im.draft('RGB', self.WORK_SIZE)
+                    im = im.convert('RGB')
+                    im.thumbnail(self.WORK_SIZE)
+                    im.save(filepath, format='PNG')
             except Exception:
-                os.remove(filepath)
-                return False, None, '이미지 파일이 아닙니다'
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                return False, None, '지원하지 않거나 너무 큰 이미지입니다'
 
             return True, filepath, None
 

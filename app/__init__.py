@@ -4,7 +4,13 @@ MVC 패턴을 적용한 Flask 앱 생성
 """
 
 import os
-from flask import Flask
+import warnings
+from flask import Flask, jsonify
+from PIL import Image
+from werkzeug.exceptions import HTTPException
+
+Image.MAX_IMAGE_PIXELS = 40_000_000
+warnings.simplefilter('error', Image.DecompressionBombWarning)
 from flask_cors import CORS
 import logging
 
@@ -30,7 +36,10 @@ def create_app(config_name='default'):
     # 기본 설정
     app.config['UPLOAD_FOLDER'] = 'uploads'
     app.config['RESULT_FOLDER'] = 'results'
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+    app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB (nginx 와 동일)
+    app.config['MAX_FORM_PARTS'] = 5
+    app.config['MAX_FORM_MEMORY_SIZE'] = 64 * 1024
+    app.config['PROPAGATE_EXCEPTIONS'] = False
 
     # 폴더 생성
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -60,6 +69,13 @@ def create_app(config_name='default'):
     # Blueprints 등록
     app.register_blueprint(main_bp)
     app.register_blueprint(analysis_bp)
+
+    @app.errorhandler(Exception)
+    def _handle_error(e):
+        if isinstance(e, HTTPException):
+            return jsonify({'success': False, 'error': e.name}), e.code
+        app.logger.exception('unhandled error')
+        return jsonify({'success': False, 'error': '서버 오류가 발생했습니다.'}), 500
 
     # 모니터링 초기화
     from app.monitoring import init_monitoring
