@@ -1,27 +1,57 @@
 # Backend (Flask + v3 모델) — CPU 전용
-FROM python:3.11-slim@sha256:e41613d42d4891e4930f79523f93f81bbc7632584ec65e36ab055f41a800b41e
+# 2단계: python:3.11-slim 에서 설치 → distroless cc(셸·패키지 관리자·perl·util-linux 없음) 로 옮긴다.
+# 둘 다 Debian 13 이라 glibc 가 같다. 최종 이미지에 필요한 시스템 라이브러리는 ldd 로 골라 담는다.
+
+FROM python:3.11-slim@sha256:e41613d42d4891e4930f79523f93f81bbc7632584ec65e36ab055f41a800b41e AS builder
 
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir --upgrade pip setuptools wheel
 
-RUN useradd --create-home --uid 10001 app
-WORKDIR /app
-
-COPY requirements.txt .
+COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.9.0 torchvision==0.24.0 \
-    && grep -vE '^(torch|torchvision)==' requirements.txt > /tmp/req.txt \
-    && pip install --no-cache-dir -r /tmp/req.txt
+    && grep -vE '^(torch|torchvision)==' /tmp/requirements.txt > /tmp/req.txt \
+    && pip install --no-cache-dir -r /tmp/req.txt \
+    && pip install --no-cache-dir --upgrade "setuptools>=78.1.1"
 
-RUN pip install --no-cache-dir --upgrade "setuptools>=78.1.1"
-ENV PYTHONUNBUFFERED=1 FLASK_APP=run.py
+# 최종 이미지로 옮길 시스템 라이브러리: /usr/local 의 모든 실행 파일·.so 가 링크하는 것 중
+# distroless cc 에 이미 있는 glibc·libgcc·libstdc++ 는 빼고 담는다.
+# (distroless 는 /lib 가 usr/lib 로의 링크라 경로를 유지하지 않고 /usr/lib/x86_64-linux-gnu 한곳에 모은다)
+# distroless cc 에 이미 있는 것(glibc·libgcc·libstdc++·libgomp·libssl/crypto·zlib·zstd)은 덮어쓰지 않는다.
+# 담는 라이브러리마다 Debian 패키지 기록을 status.d 에 함께 넣어 Trivy 가 계속 볼 수 있게 한다.
+RUN set -eu; \
+    python -m pip uninstall -y pip; \
+    # 이 앱이 쓰지 않는 표준 라이브러리 확장(터미널·readline·dbm·crypt)과 개발용 모듈은 뺀다
+    cd /usr/local/lib/python3.11; \
+    # (_uuid 가 없어도 uuid.uuid4() 는 os.urandom 으로 동작한다 — libuuid1 의 CVE 를 끌고 오지 않게 뺀다)
+    rm -rf lib-dynload/_curses* lib-dynload/readline* lib-dynload/_dbm* lib-dynload/_gdbm* lib-dynload/_crypt* lib-dynload/_uuid* \
+           ensurepip idlelib tkinter turtledemo test unittest/test lib2to3 pydoc_data; \
+    mkdir -p /deps/usr/lib/x86_64-linux-gnu /deps/var/lib/dpkg/status.d; \
+    find /usr/local -type f \( -name '*.so*' -o -path '/usr/local/bin/python3*' \) -print0 \
+      | xargs -0 ldd 2>/dev/null | awk '/=> \//{print $3}' | sort -u \
+      | grep -vE '/(libc|libm|libdl|libpthread|librt|libresolv|libutil|ld-linux-x86-64|libgcc_s|libstdc\+\+|libgomp|libssl|libcrypto|libz|libzstd)\.so' \
+      | grep -vE '^/usr/local/' > /tmp/libs.txt; \
+    cat /tmp/libs.txt; \
+    while read -r lib; do \
+      cp -L "$lib" /deps/usr/lib/x86_64-linux-gnu/; \
+      pkg=$(dpkg -S "$(readlink -f "$lib")" 2>/dev/null | head -1 | cut -d: -f1); \
+      if [ -n "$pkg" ]; then dpkg-query -s "$pkg" > "/deps/var/lib/dpkg/status.d/$pkg"; echo "  <- $pkg"; fi; \
+    done < /tmp/libs.txt
 
+FROM gcr.io/distroless/cc-debian13:nonroot@sha256:54df941ed0d06a1bd95ef5e0ce391fd8d9f94b64782dc9a60062727849ee3f97
+
+COPY --from=builder /usr/local /usr/local
+COPY --from=builder /deps/ /
+ENV PATH=/usr/local/bin:/usr/bin:/bin PYTHONUNBUFFERED=1 FLASK_APP=run.py HOME=/tmp \
+    LD_LIBRARY_PATH=/usr/local/lib
+
+WORKDIR /app
 COPY app/ ./app/
 COPY run.py gunicorn.conf.py ./
 COPY trained_model_v3.pth model_v3_meta.json ./
 
-RUN pip uninstall -y pip && rm -rf /root/.cache
-USER app
+# compose 의 tmpfs(uid=10001) 와 맞춘다. distroless 는 셸이 없어 exec 형식만 쓴다.
+USER 10001:10001
 EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=5).status == 200 else 1)"
+    CMD ["python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=5).status == 200 else 1)"]
 CMD ["gunicorn", "--config", "gunicorn.conf.py", "run:app"]
