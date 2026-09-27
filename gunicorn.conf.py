@@ -3,14 +3,14 @@ Gunicorn 프로덕션 설정
 고성능 WSGI 서버 설정 파일
 """
 
-import multiprocessing
+import os
 
 # 서버 소켓
 bind = "0.0.0.0:5000"
 backlog = 2048
 
 # Worker 프로세스
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = int(os.environ.get('GUNICORN_WORKERS', '1'))
 worker_class = "sync"
 worker_connections = 1000
 timeout = 120  # AI 모델 로딩을 위해 타임아웃 증가

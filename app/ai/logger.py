@@ -49,14 +49,19 @@ def setup_logger(
 
     # 파일 핸들러 설정 (선택적)
     if log_file:
-        file_handler = RotatingFileHandler(
-            log_file,
-            maxBytes=LoggingConfig.MAX_BYTES,
-            backupCount=LoggingConfig.BACKUP_COUNT,
-            encoding='utf-8'
-        )
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+        try:
+            file_handler = RotatingFileHandler(
+                log_file,
+                maxBytes=LoggingConfig.MAX_BYTES,
+                backupCount=LoggingConfig.BACKUP_COUNT,
+                encoding='utf-8'
+            )
+        except OSError:
+            # 읽기 전용 컨테이너 등 — 콘솔 로그만 사용
+            file_handler = None
+        if file_handler:
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
 
     return logger
 

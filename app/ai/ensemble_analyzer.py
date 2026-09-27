@@ -67,8 +67,8 @@ class EnsembleAnalyzer:
         blip_weight = 0.3
 
         # BLIP 점수를 0-100 퍼센티지로 변환
-        blip_aegen_pct = (blip_result['aegen_score'] /
-                         (blip_result['aegen_score'] + blip_result['teto_score'])) * 100
+        blip_total = blip_result['aegen_score'] + blip_result['teto_score']
+        blip_aegen_pct = (blip_result['aegen_score'] / blip_total) * 100 if blip_total else 50.0
         blip_teto_pct = 100 - blip_aegen_pct
 
         # 가중 평균 계산
@@ -121,7 +121,9 @@ class EnsembleAnalyzer:
                 'custom_aegen': custom_result['aegen_percentage'],
                 'custom_teto': custom_result['teto_percentage'],
                 'models_agree': models_agree,
-                'final_confidence': final_confidence
+                'final_confidence': final_confidence,
+                'blip_prediction': blip_result['classification'],
+                'custom_prediction': custom_result['classification'],
             }
         }
 

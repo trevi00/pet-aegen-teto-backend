@@ -1,0 +1,10 @@
+{
+ "temperature": 3.078,
+ "holdout_acc": 0.783,
+ "holdout_nll_before": 0.943,
+ "holdout_nll_after": 0.498,
+ "holdout_ece_before": 0.173,
+ "holdout_ece_after": 0.075,
+ "holdout_mean_conf_before": 0.926,
+ "holdout_mean_conf_after": 0.819
+}

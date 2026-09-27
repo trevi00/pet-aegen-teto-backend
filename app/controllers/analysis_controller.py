@@ -4,6 +4,7 @@
 
 from flask import Blueprint, request, jsonify
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -28,34 +29,40 @@ def analyze():
         # 파일 체크
         if 'image' not in request.files:
             return jsonify({'success': False, 'error': '이미지 파일이 없습니다.'}), 400
-        
+
         file = request.files['image']
-        
+
         if file.filename == '':
             return jsonify({'success': False, 'error': '파일이 선택되지 않았습니다.'}), 400
-        
+
         # 모델 체크
         if not _analyzer_service or not _analyzer_service.is_ready():
             return jsonify({'success': False, 'error': 'AI 모델이 로드되지 않았습니다.'}), 500
-        
+
         # 파일 저장
         success, filepath, error = _file_service.save_uploaded_file(file, file.filename)
         if not success:
             return jsonify({'success': False, 'error': error}), 400
-        
+
         logger.info(f"이미지 업로드 완료: {filepath}")
-        
-        # AI 분석
-        result = _analyzer_service.analyze_image(filepath)
-        
+
+        # AI 분석 — 사진은 분석 직후 삭제한다 (저장하지 않음)
+        try:
+            result = _analyzer_service.analyze_image(filepath)
+        finally:
+            try:
+                os.remove(filepath)
+            except OSError:
+                logger.warning("업로드 파일 삭제 실패")
+
         if result['success']:
             return jsonify(result)
-        else:
-            return jsonify(result), 500
-            
+        logger.error(f"분석 실패: {result.get('error')}")
+        return jsonify({'success': False, 'error': '분석 중 오류가 발생했습니다.'}), 500
+
     except Exception as e:
         logger.error(f"분석 중 오류: {e}", exc_info=True)
-        return jsonify({'success': False, 'error': f'분석 중 오류가 발생했습니다: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': '분석 중 오류가 발생했습니다.'}), 500
 
 
 @analysis_bp.route('/health', methods=['GET'])

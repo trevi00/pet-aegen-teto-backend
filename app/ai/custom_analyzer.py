@@ -20,6 +20,8 @@ class CustomPetAnalyzer:
         self.model_path = model_path
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = None
+        # 온도 보정: 로짓/T 로 과신을 누그러뜨린다 (정확도 불변). 보정값은 학습 후 calibration.json 에서.
+        self.temperature = max(float(os.environ.get('MODEL_TEMPERATURE', '1.0')), 1e-3)
         self.transform = transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
@@ -79,7 +81,7 @@ class CustomPetAnalyzer:
         # 예측
         with torch.no_grad():
             outputs = self.model(input_tensor)
-            probabilities = torch.nn.functional.softmax(outputs, dim=1)
+            probabilities = torch.nn.functional.softmax(outputs / self.temperature, dim=1)
             confidence, predicted = torch.max(probabilities, 1)
 
             # 클래스: 0 = aegen, 1 = teto

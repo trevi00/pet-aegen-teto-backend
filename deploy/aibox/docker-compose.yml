@@ -1,0 +1,64 @@
+# agtt.cloud 배포 (aibox). 외부 노출은 cloudflared 터널 하나뿐 — 호스트 포트는 127.0.0.1 에만.
+name: agtt
+
+services:
+  backend:
+    build:
+      context: ./pet-aegen-teto-backend
+      dockerfile: Dockerfile.prod
+    environment:
+      GUNICORN_WORKERS: "1"
+      MODEL_TEMPERATURE: "3.078"   # models/calibration.json (2026-09-27, 정답 240장으로 보정)
+      ALLOWED_ORIGINS: "https://agtt.cloud,https://www.agtt.cloud"
+    read_only: true
+    tmpfs:
+      - /app/uploads:size=64m,uid=10001
+      - /app/results:size=16m,uid=10001
+      - /tmp:size=64m
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    mem_limit: 6g
+    cpus: 6
+    pids_limit: 256
+    networks: [internal]
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./pet-aegen-teto-web
+      args:
+        VITE_API_URL: /api
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=32m
+      - /var/run:size=1m
+      - /tmp:size=16m
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    mem_limit: 256m
+    cpus: 1
+    ports:
+      - "127.0.0.1:8081:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks: [internal, edge]
+    restart: unless-stopped
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run
+    env_file: ./secrets/tunnel.env   # TUNNEL_TOKEN (chmod 600, git 밖)
+    read_only: true
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    mem_limit: 256m
+    cpus: 0.5
+    depends_on: [web]
+    networks: [edge]   # web:8080 만 본다 — backend(internal) 와는 분리
+    restart: unless-stopped
+
+networks:
+  internal:
+    internal: true   # backend 는 인터넷·호스트 LAN 에 나가지 못한다
+  edge: {}
