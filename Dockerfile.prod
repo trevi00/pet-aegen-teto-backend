@@ -8,7 +8,7 @@ RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir --upgrade pip setuptools wheel
 
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.9.0 torchvision==0.24.0 \
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.9.1 torchvision==0.24.1 \
     && grep -vE '^(torch|torchvision)==' /tmp/requirements.txt > /tmp/req.txt \
     && pip install --no-cache-dir -r /tmp/req.txt \
     && pip install --no-cache-dir --upgrade "setuptools>=78.1.1"
@@ -22,8 +22,8 @@ RUN set -eu; \
     python -m pip uninstall -y pip; \
     # 이 앱이 쓰지 않는 표준 라이브러리 확장(터미널·readline·dbm·crypt)과 개발용 모듈은 뺀다
     cd /usr/local/lib/python3.11; \
-    # (_uuid 가 없어도 uuid.uuid4() 는 os.urandom 으로 동작한다 — libuuid1 의 CVE 를 끌고 오지 않게 뺀다)
-    rm -rf lib-dynload/_curses* lib-dynload/readline* lib-dynload/_dbm* lib-dynload/_gdbm* lib-dynload/_crypt* lib-dynload/_uuid* \
+    # (_uuid 없이도 uuid4() 는 os.urandom 으로 동작. sqlite3 도 앱이 쓰지 않는다(bz2 는 torch 가 import) — libuuid1·libsqlite3 의 CVE 를 끌고 오지 않게 뺀다)
+    rm -rf lib-dynload/_curses* lib-dynload/readline* lib-dynload/_dbm* lib-dynload/_gdbm* lib-dynload/_crypt* lib-dynload/_uuid* lib-dynload/_sqlite3* \
            ensurepip idlelib tkinter turtledemo test unittest/test lib2to3 pydoc_data; \
     mkdir -p /deps/usr/lib/x86_64-linux-gnu /deps/var/lib/dpkg/status.d; \
     find /usr/local -type f \( -name '*.so*' -o -path '/usr/local/bin/python3*' \) -print0 \
