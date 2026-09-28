@@ -1,7 +1,7 @@
 # 앱이 실제로 import 하는 것 + 그 의존성만 (2026-09-28 정리: requests·dotenv·httpx 등 옛 잔재 제거)
 # torch/torchvision 은 Dockerfile 에서 CPU 인덱스로 따로 설치한다
-torch==2.9.1
-torchvision==0.24.1
+torch==2.14.0
+torchvision==0.29.0
 
 # 웹
 flask==3.1.3

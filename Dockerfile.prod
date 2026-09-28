@@ -8,7 +8,7 @@ RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir --upgrade pip setuptools wheel
 
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.9.1 torchvision==0.24.1 \
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.14.0 torchvision==0.29.0 \
     && grep -vE '^(torch|torchvision)==' /tmp/requirements.txt > /tmp/req.txt \
     && pip install --no-cache-dir -r /tmp/req.txt \
     && pip install --no-cache-dir --upgrade "setuptools>=78.1.1"

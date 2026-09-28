@@ -1,0 +1,8 @@
+[Unit]
+Description=agttpet.com 운영 이미지 주간 취약점 스캔 (Trivy)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/agtt-trivy-weekly.sh
